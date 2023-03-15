@@ -444,7 +444,7 @@ bool WASAPISource::ProcessCaptureData()
 
 		if (!captureSize)
 			break;
-
+		//默认ts单位10us
 		res = capture->GetBuffer(&buffer, &frames, &flags, &pos, &ts);
 		if (FAILED(res)) {
 			if (res != AUDCLNT_E_DEVICE_INVALIDATED)
@@ -462,6 +462,7 @@ bool WASAPISource::ProcessCaptureData()
 		data.speakers = speakers;
 		data.samples_per_sec = sampleRate;
 		data.format = format;
+		//使用系统时戳还是系统时戳
 		data.timestamp = useDeviceTiming ? ts * 100 : os_gettime_ns();
 
 		if (!useDeviceTiming)

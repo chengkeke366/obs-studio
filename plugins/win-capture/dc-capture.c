@@ -55,11 +55,13 @@ void dc_capture_init(struct dc_capture *capture, int x, int y, uint32_t width,
 		bih->biWidth = width;
 		bih->biHeight = height;
 		bih->biPlanes = 1;
-
+		//创建一个设备兼容的DC
 		capture->hdc = CreateCompatibleDC(NULL);
+		////创建可以直接写入的、与设备无关的位图(DIB)
 		capture->bmp =
 			CreateDIBSection(capture->hdc, &bi, DIB_RGB_COLORS,
 					 (void **)&capture->bits, NULL, 0);
+		//将位图选入到DC
 		capture->old_bmp = SelectObject(capture->hdc, capture->bmp);
 	}
 }
@@ -149,16 +151,17 @@ void dc_capture_capture(struct dc_capture *capture, HWND window)
 				  "texture DC");
 		return;
 	}
-
+	//获取要录制IDE窗口DC
 	hdc_target = GetDC(window);
 
+	////将桌面窗口DC的图象复制到兼容DC中  
 	BitBlt(hdc, 0, 0, capture->width, capture->height, hdc_target,
 	       capture->x, capture->y, SRCCOPY);
-
+	//释放窗口DC
 	ReleaseDC(NULL, hdc_target);
 
 	if (capture->cursor_captured && !capture->cursor_hidden)
-		draw_cursor(capture, hdc, window);
+		draw_cursor(capture, hdc, window);//在位图上绘制鼠标图标
 
 	dc_capture_release_dc(capture);
 
