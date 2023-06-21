@@ -197,7 +197,7 @@ static void flv_video(struct serializer *s, int32_t dts_offset,
 	/* these are the 5 extra bytes mentioned above */
 	s_w8(s, packet->keyframe ? 0x17 : 0x27);//ckk:帧类型与视频编码类型
 	// AVPacketType  begine
-	s_w8(s, is_header ? 0 : 1); //0：AVCSquence Header   1：AVC NALU
+	s_w8(s, is_header ? 0 : 1); //0为AVCSquence Header Data部分为sps和pps   1为AVC NALU
 	s_wb24(s, get_ms_time(packet, offset));
 	s_write(s, packet->data, packet->size);
 
