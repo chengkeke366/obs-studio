@@ -444,7 +444,7 @@ bool WASAPISource::ProcessCaptureData()
 
 		if (!captureSize)
 			break;
-		//默认ts单位10us
+		//参数ts默认单位10us
 		res = capture->GetBuffer(&buffer, &frames, &flags, &pos, &ts);
 		if (FAILED(res)) {
 			if (res != AUDCLNT_E_DEVICE_INVALIDATED)
