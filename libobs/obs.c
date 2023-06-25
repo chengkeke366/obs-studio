@@ -429,6 +429,7 @@ static int obs_init_video(struct obs_video_info *ovi)
 	if (pthread_mutex_init(&video->task_mutex, NULL) < 0)
 		return OBS_VIDEO_FAIL;
 
+	//启动视频渲染线程
 #ifdef __APPLE__
 	errorcode = pthread_create(&video->video_thread, NULL,
 				   obs_graphics_thread_autorelease, obs);
@@ -2138,13 +2139,15 @@ void obs_context_data_insert(struct obs_context_data *context,
 	assert(first);
 
 	context->mutex = mutex;
-
+	//头插法---将context节点插入到链表头部
 	pthread_mutex_lock(mutex);
-	context->prev_next = first;
 	context->next = *first;
 	*first = context;
+
+	//新插入的context->prev_next 始终存储头结点指针的地址，程序启动后，该变量（first）一直不会改变
+	context->prev_next = first;
 	if (context->next)
-		context->next->prev_next = &context->next;
+		context->next->prev_next = &context->next;//修改原本first节点（现在是第二个节点）的prev_next为当前插入节点next指针的地址
 	pthread_mutex_unlock(mutex);
 }
 
@@ -2152,6 +2155,7 @@ void obs_context_data_remove(struct obs_context_data *context)
 {
 	if (context && context->mutex) {
 		pthread_mutex_lock(context->mutex);
+	        //存储前一个节点的next的二级指针
 		if (context->prev_next)
 			*context->prev_next = context->next;
 		if (context->next)

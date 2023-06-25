@@ -1117,8 +1117,8 @@ struct AdvancedOutput : BasicOutputHandler {
 	OBSEncoder h264Streaming;
 	OBSEncoder h264Recording;
 
-	bool ffmpegOutput;
-	bool ffmpegRecording;
+	bool ffmpegOutput;//本地录制选项，使用ffmpeg录制
+	bool ffmpegRecording;//本地录制选项，使用ffmpeg录制本地文件
 	bool useStreamEncoder;
 	bool usesBitrate = false;
 
@@ -1186,23 +1186,30 @@ static void ApplyEncoderDefaults(OBSData &settings,
 
 AdvancedOutput::AdvancedOutput(OBSBasic *main_) : BasicOutputHandler(main_)
 {
+	//RecType=Standard或者FFmpeg
 	const char *recType =
 		config_get_string(main->Config(), "AdvOut", "RecType");
+	//推流编码器配置
 	const char *streamEncoder =
 		config_get_string(main->Config(), "AdvOut", "Encoder");
+	//录制编码器的配置
 	const char *recordEncoder =
 		config_get_string(main->Config(), "AdvOut", "RecEncoder");
-
+	//是否使用ffmpeg录制？
 	ffmpegOutput = astrcmpi(recType, "FFmpeg") == 0;
 	ffmpegRecording =
 		ffmpegOutput &&
 		config_get_bool(main->Config(), "AdvOut", "FFOutputToFile");
+	//如果录制没指定编码器（RecEncoder），那么使用推流设置中的编码器
 	useStreamEncoder = astrcmpi(recordEncoder, "none") == 0;
 
+	//推流配置
 	OBSData streamEncSettings = GetDataFromJsonFile("streamEncoder.json");
+	//本地录制配置
 	OBSData recordEncSettings = GetDataFromJsonFile("recordEncoder.json");
 
 	if (ffmpegOutput) {
+		//创建ffmpeg_output
 		fileOutput = obs_output_create(
 			"ffmpeg_output", "adv_ffmpeg_output", nullptr, nullptr);
 		if (!fileOutput)
@@ -1240,6 +1247,7 @@ AdvancedOutput::AdvancedOutput(OBSBasic *main_) : BasicOutputHandler(main_)
 						  OBSReplayBufferSaved, this);
 		}
 
+		//创建 ffmpeg_muxer
 		fileOutput = obs_output_create(
 			"ffmpeg_muxer", "adv_file_output", nullptr, nullptr);
 		if (!fileOutput)
@@ -2032,10 +2040,12 @@ BasicOutputHandler::GetRecordingFilename(const char *path, const char *ext,
 
 BasicOutputHandler *CreateSimpleOutputHandler(OBSBasic *main)
 {
+	//简单模式
 	return new SimpleOutput(main);
 }
 
 BasicOutputHandler *CreateAdvancedOutputHandler(OBSBasic *main)
 {
+	//高级模式
 	return new AdvancedOutput(main);
 }

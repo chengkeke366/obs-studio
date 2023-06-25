@@ -286,7 +286,7 @@ struct obs_core_video {
 	uint64_t video_avg_frame_time_ns;
 	double video_fps;
 	video_t *video;
-	pthread_t video_thread;
+	pthread_t video_thread;  //视频渲染线程
 	uint32_t total_frames;
 	uint32_t lagged_frames;
 	bool thread_initialized;
@@ -495,7 +495,7 @@ struct obs_context_data {
 
 	pthread_mutex_t *mutex;
 	struct obs_context_data *next;
-	struct obs_context_data **prev_next;
+	struct obs_context_data **prev_next;//存储前一个节点的next指针的地址，方便用于断开
 
 	bool private;
 };
