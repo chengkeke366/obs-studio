@@ -1419,6 +1419,18 @@ obs_source_t *obs_get_output_source(uint32_t channel)
 	return obs_view_get_source(&obs->data.main_view, channel);
 }
 
+/* OBS关于channel与source的关系说明：
+* 
+Rendering video or audio starts from output channels. You assign a source to an output channel via the obs_set_output_source() function.
+The channel parameter can be any number from 0..(MAX_CHANNELS-1). You may initially think that this is how you display multiple sources at once;
+however, sources are hierarchical. Sources such as scenes or transitions can have multiple sub-sources, and those sub-sources in turn can have sub-sources and so on (see Displaying Sources for more information).
+Typically, you would use scenes to draw multiple sources as a group with specific transforms for each source, as a scene is just another type of source.
+The “channel” design allows for highly complex video presentation setups. The OBS Studio front-end has yet to even fully utilize this back-end design for its rendering,
+and currently only uses one output channel to render one scene at a time. It does however utilize additional channels for things such as global audio sources which are set in audio settings.
+
+(Author’s note: “Output channels” are not to be confused with output objects or audio channels. Output channels are used to set the sources you want to output, and output objects are used for actually streaming/recording/etc.)
+
+*/
 void obs_set_output_source(uint32_t channel, obs_source_t *source)
 {
 	assert(channel < MAX_CHANNELS);
@@ -2129,6 +2141,14 @@ void obs_context_data_free(struct obs_context_data *context)
 	memset(context, 0, sizeof(*context));
 }
 
+
+/*
+prev_next字段为一个二级指针：存储前一个节点的next变量（指针）的地址
+思考：为什么要存储next指针 的地址 呢？
+---> 修改prev_next中的存储值，就相当于修改前面节点的next指向。
+*/
+
+
 void obs_context_data_insert(struct obs_context_data *context,
 			     pthread_mutex_t *mutex, void *pfirst)
 {
@@ -2155,11 +2175,10 @@ void obs_context_data_remove(struct obs_context_data *context)
 {
 	if (context && context->mutex) {
 		pthread_mutex_lock(context->mutex);
-	        //存储前一个节点的next的二级指针
 		if (context->prev_next)
-			*context->prev_next = context->next;
+			*context->prev_next = context->next;//将前面节点next指针指向需要删除节点的下一个节点
 		if (context->next)
-			context->next->prev_next = context->prev_next;
+			context->next->prev_next = context->prev_next;//更新删除当前节点后，后面节点的prev_next更新为当前节点的prev_next节点
 		pthread_mutex_unlock(context->mutex);
 
 		context->mutex = NULL;

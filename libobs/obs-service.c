@@ -39,6 +39,7 @@ static obs_service_t *obs_service_create_internal(const char *id,
 						  obs_data_t *hotkey_data,
 						  bool private)
 {
+	//通过id="rtmp_custom" 查找obs_service_info实例
 	const struct obs_service_info *info = find_service(id);
 	struct obs_service *service;
 

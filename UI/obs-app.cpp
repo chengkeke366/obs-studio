@@ -509,12 +509,12 @@ static bool do_mkdir(const char *path)
 static bool MakeUserDirs()
 {
 	char path[512];
-
+	//基础配置
 	if (GetConfigPath(path, sizeof(path), "obs-studio/basic") <= 0)
 		return false;
 	if (!do_mkdir(path))
 		return false;
-
+	//日志目录
 	if (GetConfigPath(path, sizeof(path), "obs-studio/logs") <= 0)
 		return false;
 	if (!do_mkdir(path))
@@ -526,17 +526,18 @@ static bool MakeUserDirs()
 		return false;
 
 #ifdef _WIN32
+	//崩溃目录
 	if (GetConfigPath(path, sizeof(path), "obs-studio/crashes") <= 0)
 		return false;
 	if (!do_mkdir(path))
 		return false;
-
+	//升级目录
 	if (GetConfigPath(path, sizeof(path), "obs-studio/updates") <= 0)
 		return false;
 	if (!do_mkdir(path))
 		return false;
 #endif
-
+	//插件配置目录
 	if (GetConfigPath(path, sizeof(path), "obs-studio/plugin_config") <= 0)
 		return false;
 	if (!do_mkdir(path))
@@ -1251,7 +1252,7 @@ void OBSApp::AppInit()
 
 	if (!InitApplicationBundle())
 		throw "Failed to initialize application bundle";
-	if (!MakeUserDirs())
+	if (!MakeUserDirs())//创建obs依赖的目录
 		throw "Failed to create required user directories";
 	if (!InitGlobalConfig())
 		throw "Failed to initialize global config";

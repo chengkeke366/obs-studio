@@ -480,7 +480,7 @@ extern void stop_raw_video(video_t *video,
 
 struct obs_context_data {
 	char *name;
-	void *data;
+	void *data;//存储create出来的对象（nvenc_create出来的nvenc_data、obs_x264_create出来的obs_x264，还有各种source的实例如：WASAPISource、ffmpeg_source.debug obs_source_create_internal函数）
 	obs_data_t *settings;
 	signal_handler_t *signals;
 	proc_handler_t *procs;
@@ -495,7 +495,7 @@ struct obs_context_data {
 
 	pthread_mutex_t *mutex;
 	struct obs_context_data *next;
-	struct obs_context_data **prev_next;//存储前一个节点的next指针的地址，方便用于断开
+	struct obs_context_data **prev_next;//存储前一个节点的next指针的地址，方便用于删除当前节点
 
 	bool private;
 };

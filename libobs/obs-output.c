@@ -131,8 +131,8 @@ obs_output_t *obs_output_create(const char *id, const char *name,
 	} else {
 		output->info = *info;
 	}
-	output->video = obs_get_video();
-	output->audio = obs_get_audio();
+	output->video = obs_get_video();//obs_core_video.video (video_output)
+	output->audio = obs_get_audio();//obs_core_audio.audio (audio_output)
 	if (output->info.get_defaults)
 		output->info.get_defaults(output->context.settings);
 

@@ -5,10 +5,10 @@
 class OBSBasic;
 
 struct BasicOutputHandler {
-	OBSOutput fileOutput;
-	OBSOutput streamOutput;
+	OBSOutput fileOutput; //本地录制输出
+	OBSOutput streamOutput;//rtmp 输出
 	OBSOutput replayBuffer;
-	OBSOutput virtualCam;
+	OBSOutput virtualCam;//虚拟摄像头输出
 	bool streamingActive = false;
 	bool recordingActive = false;
 	bool delayActive = false;

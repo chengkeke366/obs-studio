@@ -61,7 +61,7 @@ struct audio_output {
 	size_t channels;
 	size_t planes;
 
-	pthread_t thread;
+	pthread_t thread;//音频输出线程
 	os_event_t *stop_event;
 
 	bool initialized;
@@ -181,6 +181,7 @@ static void input_and_output(struct audio_output *audio, uint64_t audio_time,
 			data[mix_idx].data[i] = mix->buffer[i];
 	}
 
+	//音频输出线程回调函数进行数据处理
 	/* get new audio data */
 	success = audio->input_cb(audio->input_param, prev_time, audio_time,
 				  &new_ts, active_mixes, data);
@@ -367,7 +368,7 @@ int audio_output_open(audio_t **audio, struct audio_output_info *info)
 	memcpy(&out->info, info, sizeof(struct audio_output_info));
 	out->channels = get_audio_channels(info->speakers);
 	out->planes = planar ? out->channels : 1;
-	out->input_cb = info->input_callback;
+	out->input_cb = info->input_callback;//audio_callback
 	out->input_param = info->input_param;
 	out->block_size = (planar ? 1 : out->channels) *
 			  get_audio_bytes_per_channel(info->format);
@@ -380,10 +381,12 @@ int audio_output_open(audio_t **audio, struct audio_output_info *info)
 		goto fail;
 	if (os_event_init(&out->stop_event, OS_EVENT_TYPE_MANUAL) != 0)
 		goto fail;
+	//音频输出线程创建
 	if (pthread_create(&out->thread, NULL, audio_thread, out) != 0)
 		goto fail;
 
 	out->initialized = true;
+	//更新obs_core_audio.audio对象
 	*audio = out;
 	return AUDIO_OUTPUT_SUCCESS;
 

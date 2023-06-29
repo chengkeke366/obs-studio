@@ -1158,6 +1158,7 @@ bool OBSBasic::LoadService()
 	if (ret <= 0)
 		return false;
 
+	//从配置文件中读取配置的rtmp信息
 	obs_data_t *data =
 		obs_data_create_from_json_file_safe(serviceJsonPath, "bak");
 
@@ -1165,11 +1166,13 @@ bool OBSBasic::LoadService()
 		return false;
 
 	obs_data_set_default_string(data, "type", "rtmp_common");
+	//"rtmp_custom"
 	type = obs_data_get_string(data, "type");
 
 	obs_data_t *settings = obs_data_get_obj(data, "settings");
 	obs_data_t *hotkey_data = obs_data_get_obj(data, "hotkeys");
 
+	//创建rtmp推流服务
 	service = obs_service_create(type, "default_service", settings,
 				     hotkey_data);
 	obs_service_release(service);
@@ -1713,8 +1716,11 @@ void OBSBasic::OBSInit()
 
 	AddExtraModulePaths();
 	blog(LOG_INFO, "---------------------------------");
+
+	//加载所有插件
 	obs_load_all_modules();
 	blog(LOG_INFO, "---------------------------------");
+	//打印已加载的模块
 	obs_log_loaded_modules();
 	blog(LOG_INFO, "---------------------------------");
 	obs_post_load_modules();
